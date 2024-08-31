@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Juego de Memoria Uno </title>
+    <style>       
+
+
+      @font-face {
+      font-family: 'Nexa';
+      src: url(src/fonts/MyriadPro-Regular.woff) format(woff);
+      font-weight: bold;
+      font-style: bold;
+      }
+
+      body {
+        display: flex;
+        font-family: 'Nexa';
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 50%;
+        height: 100%;
+        background: url(src/images/fondo_vectores.png);
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        background-position: 50% 50%;
+        transform: rotate(0deg);
+        animation: giro 80s linear infinite;
+      }
+
+      @keyframes giro {
+        0% {
+          transform: rotate(0deg);
+        }
+       80% {
+          transform: rotate(360deg);
+        }
+      }
+
+
+      h1 {
+        font-family: 'Nexa';
+        font-size: 30px;
+        padding: 5PX;
+      }
+ 
+      .game-title {
+        color: #014c7d;
+        font-size:  2rem; /* Ajusta el tamaño del título para pantallas grandes */
+      }
+ 
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 150px);
+        grid-template-rows: repeat(3, 200px);
+        gap: 20px;
+        margin-bottom: 36px;
+      }
+
+
+ 
+      .grid-item {
+        background-color: #1880DF;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 1px 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 13px 12px 6px 0px rgb(185, 185, 209);
+        cursor: pointer;
+        border-radius: 5px;
+        position: relative;
+      }
+
+      .grid-item img {
+        max-width: 100%;
+        max-height: 100%;
+        display: none;
+      }
+      
+ 
+      .grid-item:hover {
+        box-shadow: 0px 8px 16px rgba(53, 49, 49, 0.3);
+      }
+ 
+      .grid-item.show img {
+        display: block;
+      }
+ 
+      .grid-item.show {
+        display: flex;
+        flex-flow: column;
+        align-items: center;
+        background-color: white;
+        width: 150px;
+        height: 200px;
+        border: 2px solid #1880DF;
+      }
+ 
+ 
+      .score-container {
+        font-family: 'Nexa';
+        display: flex;
+        align-items: end;
+        font-size: 24px;
+      }
+ 
+ 
+      .icon {
+        width: 67px;
+        height: 70px;
+        margin-right: -13px;
+        padding: 15px;
+      }
+
+      .score-box {
+        width: 40px;
+        height: 30px;
+        border: 2px solid #1880DF;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-left: 10px;
+        font-size: 18px;
+        margin-bottom: 32px;
+      }
+  
+      .wrong-box {
+          width: 40px;
+          height: 30px;
+          border-width: 2px 2px 2px 0px;
+          border-style: solid;
+          border-color: #0066cc;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 18px;
+          margin-bottom: 32px;
+        }
+
+      .headerWrapp {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width:63%;
+      }
+ 
+      .clockWrapp {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: start;
+        align-items: center;
+        margin-bottom: 8px;
+        cursor: pointer;
+      }
+ 
+      .timer-box {
+        width: 80px;
+        height: 30px;
+        border: 2px solid #1880DF;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-left: 10px;
+        font-size: 18px;
+      }
+ 
+      .bigWrapper {
+        width: 37%; /* Ajusta el ancho del contenedor principal */
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: center;
+        align-items: center;
+      }
+ 
+       /* Estilo del modal de instrucciones */
+      .modal {
+        display: none; /* Oculto por defecto */
+        position: fixed; /* Fijo en la pantalla, no se desplaza con la página */
+        z-index: 1000; /* Asegura que esté por encima de otros elementos */
+        left: 0;
+        top: 0;
+        width: 100%; /* Cubre todo el ancho de la pantalla */
+        height: 100%; /* Cubre toda la altura de la pantalla */
+        overflow: auto; /* Permite el desplazamiento si el contenido es muy grande */
+        background-color: rgba(0, 0, 0, 0.4); /* Fondo semitransparente */
+        padding-top: 60px; /* Espacio superior opcional */
+      }
+ 
+      .modal-content {
+        font-family: 'Nexa';
+        color: #1880DF;
+        font-size: 24px;
+        background-image: url(src/images/fondo_instrucciones.png);
+        background-color: #fefefe;
+        margin: 5% auto; /* Centrado vertical y horizontalmente */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 90%;
+        max-width: 504px;
+        text-align: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative; /* Asegura que el contenido esté en el lugar adecuado */
+      }
+       
+     .parrafoModal {
+      color: #004B7C;
+     }
+ 
+    .modalBoton {
+      padding: 11px 25px;
+      color: #ebf1f7;
+      font-family: 'Nexa';
+      width:  32%;
+      font-size: 20px;
+      border: 1px solid #1880DF;
+      background-color: #1880DF;
+      border-radius: 49px;
+      font-style: normal;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+     .modalBoton:hover {
+       box-shadow: 0px 8px 16px rgba(53, 49, 49, 0.3);
+     }
+ 
+ 
+    .botonReiniciar {
+      padding: 12px 20px;
+      color: #ebf1f7;
+      font-family: 'Nexa';
+      width: 120%;
+      font-size: 20px;
+      border: 1px solid #1880DF;
+      background-color: #1880DF;
+      border-radius: 49px;
+      font-style: normal;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+ 
+ 
+    .botonReiniciar:hover {
+      box-shadow: 0px 8px 16px rgba(53, 49, 49, 0.3);
+    }
+ 
+    </style>
+  </head>
+  <body>
+
+    <!-- Modal de Instrucciones e Inicio -->
+    <div id="instructionsModal" class="modal">
+      <div class="modal-content">
+        <!--<img src="images/instrucciones.png" alt="I" class="modal-image">-->
+        <h2>¡Bienvenido al Juego! </h2>
+        <p class="parrafoModal">Encuentra todas las parejas de imágenes en el menor tiempo posible.</p>
+        <p>¡Buena suerte!</p>
+        <button   class="modalBoton"  onclick="startGame()">COMENZAR</button>
+      </div>
+    </div>
+    <div>
+      <img src="src/images/Logo_banco.png" alt="Logo banco">
+    </div>
+    <div class="game-title">
+      <h1>PROBANDO TU MEMORIA</h1>
+    </div>
+    <div class="bigWrapper">
+      <div class="headerWrapp">
+        <div class="clockWrapp">
+          <img src="src/images/cronometro.png" alt="Imagen 1" onclick="startTimer()" />  
+          <div id="timer" class="timer-box">00:00</div>
+        </div>
+        <div class="score-container">
+          <img src="src/images/correctas.png" alt="" class="icon">
+          <div id="score-box" class="score-box">0</div>
+          <div id="wrong-box" class="wrong-box">0</div>
+        </div>
+      </div>
+    
+      <div class="grid">
+        <div class="grid-item" onclick="selectImage(0)">
+          <img src="src/images\imagen01.png" alt="Imagen 1" />
+        </div>
+        <div class="grid-item" onclick="selectImage(1)">
+          <img src="src/images\imagen02.png" alt="Imagen 2" />
+        </div>
+        <div class="grid-item" onclick="selectImage(2)">
+          <img src="src/images/imagen03.png" alt="Imagen 3" />
+        </div>
+        <div class="grid-item" onclick="selectImage(3)">
+          <img src="src/images\imagen04.png" alt="Imagen 4" />
+        </div>
+        <div class="grid-item" onclick="selectImage(4)">
+          <img src="src/images\imagen05.png" alt="Imagen 5" />
+        </div>
+        <div class="grid-item" onclick="selectImage(5)">
+          <img src="src/images\imagen06.png" alt="Imagen 6" />
+        </div>
+        <div class="grid-item" onclick="selectImage(6)">
+          <img src="src/images\imagen01.png" alt="Imagen 7" />
+        </div>
+        <div class="grid-item" onclick="selectImage(7)">
+          <img src="src/images\imagen05.png" alt="Imagen 8" />
+        </div>
+        <div class="grid-item" onclick="selectImage(8)">
+          <img src="src/images\imagen02.png" alt="Imagen 9" />
+        </div>
+        <div class="grid-item" onclick="selectImage(9)">
+          <img src="src/images\imagen06.png" alt="Imagen 10" />
+        </div>
+        <div class="grid-item" onclick="selectImage(10)">
+          <img src="src/images\imagen04.png" alt="Imagen 11" />
+        </div>
+        <div class="grid-item" onclick="selectImage(11)">
+          <img src="src/images/imagen03.png" alt="Imagen 12" />
+        </div>
+      </div>
+    </div>
+    <div>        
+      <button class="botonReiniciar" onclick="resetGame()">REINICIAR</button>
+    </div>
+    <script>
+
+    // Mostrar el modal de instrucciones al cargar la página
+      window.onload = function () {
+        document.getElementById("instructionsModal").style.display = "block";
+      };
+
+      function resetGame() {
+        clearInterval(timerInterval); // Detener el cronómetro
+        time = 0;
+        matchedPairs = 0;
+        score = 0;
+        wrongAttempts = 0;
+        firstSelection = null;
+        secondSelection = null;
+
+        clearInterval(timerInterval);
+        document.getElementById("timer").innerText = "00:00";
+
+        // Reiniciar los valores visuales del juego
+        document.getElementById("score-box").innerText = score;
+        document.getElementById("wrong-box").innerText = wrongAttempts;
+        document.getElementById("timer").innerText = "00:00";
+
+        // Ocultar todas las imágenes mostradas
+        const gridItems = document.querySelectorAll(".grid-item");
+        gridItems.forEach(item => item.classList.remove("show"));
+
+        // Mezclar las imágenes
+        shuffleImages(gridItems);
+      }
+
+    // Función para empezar el juego (oculta el modal y ejecuta el resto del código)
+      function startGame() {
+            document.getElementById("instructionsModal").style.display = "none";
+            initGame(); // Llama a la función para inicializar el juego
+            startTimer(); // Inicia el cronómetro (si aplica)
+      }
+
+    // Lista de todas las imágenes disponibles
+      const allImages = [
+        "src/images/imagen01.png",
+        "src/images/imagen02.png",
+        "src/images/imagen03.png",
+        "src/images/imagen04.png",
+        "src/images/imagen05.png",
+        "src/images/imagen06.png",
+        "src/images/imagen07.png",
+        "src/images/imagen08.png",
+        "src/images/imagen09.png",
+        "src/images/imagen10.png",
+        "src/images/imagen11.png",
+        "src/images/imagen12.png",
+        "src/images/imagen13.png",
+        "src/images/imagen14.png",
+        "src/images/imagen15.png",
+        "src/images/imagen16.png",
+        "src/images/imagen17.png",
+        "src/images/imagen18.png",
+        "src/images/imagen19.png",
+        "src/images/imagen20.png",
+      ];
+
+      // Función para obtener 6 imágenes aleatorias
+      function getRandomImages() {
+        const shuffledImages = allImages.sort(() => 0.5 - Math.random());
+        return shuffledImages.slice(0, 6);
+      }
+
+      // Función para mezclar un array (Fisher-Yates Shuffle)
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      // Inicializa el juego
+      function initGame() {
+        const gridItems = document.querySelectorAll(".grid-item img");
+        let selectedImages = getRandomImages();
+        selectedImages = selectedImages.concat(selectedImages); // Duplica las imágenes
+        selectedImages = shuffleArray(selectedImages); // Mezcla las imágenes
+
+        // Asigna las imágenes mezcladas a los elementos de la cuadrícula
+        gridItems.forEach((img, index) => {
+          img.src = selectedImages[index];
+        });
+      }
+
+      // El resto de tu código (función selectImage e isMatch) permanece igual
+      let selectedItems = [];
+      let score = 0;
+      let wrong = 0;
+
+      function selectImage(index) {
+        const items = document.querySelectorAll(".grid-item");
+
+        // Si ya está descubierta, no hacer nada
+        if (items[index].classList.contains("show")) return;
+
+        // Mostrar la imagen seleccionada
+        items[index].classList.add("show");
+        selectedItems.push(index);
+
+        // Si se seleccionan dos imágenes
+        if (selectedItems.length === 2) {
+          // Si es un match
+          if (isMatch(selectedItems)) {
+            score++;
+            document.getElementById("score-box").textContent = score;
+            selectedItems = [];
+          } else {
+            // Si no es un match, ocultar después de 1 segundo
+            wrong++;
+            document.getElementById("wrong-box").textContent = wrong;
+            setTimeout(() => {
+              selectedItems.forEach((i) => items[i].classList.remove("show"));
+              selectedItems = [];
+            }, 1000);
+          }
+        }
+      }
+
+      function isMatch(indices) {
+        const [first, second] = indices;
+        const firstImg = document.querySelectorAll(".grid-item img")[first].src;
+        const secondImg = document.querySelectorAll(".grid-item img")[second].src;
+        return firstImg === secondImg;
+      }
+      // Tiempo inicial en segundos (1 minuto = 60 segundos)
+      let timeLeft = 60;
+      let timerInterval;
+
+      // Función para formatear el tiempo en minutos y segundos
+      function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
+      }
+
+      // Actualiza el temporizador en el HTML
+      function updateTimer() {
+        const timerElement = document.getElementById("timer");
+        timerElement.textContent = formatTime(timeLeft);
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          timerElement.textContent = "Termino";
+        } else {
+          timeLeft--;
+        }
+      }
+          // Inicia el temporizador cuando se hace clic en la imagen del cronómetro
+      function startTimer() {
+        if (!timerInterval) {
+          timerInterval = setInterval(updateTimer, 1000);
+        }
+      }
+        // Mostrar el modal de instrucciones al cargar la página
+
+    window.onload = function() {
+      const modal = document.getElementById("instructionsModal");
+        modal.style.display = "block";
+      };
+
+    function startGame() {
+      document.getElementById("instructionsModal").style.display = "none";
+      resetGame(); // Reinicia el juego al iniciar
+    }
+      
+
+    function shuffleImages(gridItems) {
+      const images = [
+        "src/images/imagen01.png",
+        "src/images/imagen02.png",
+        "src/images/imagen03.png",
+        "src/images/imagen04.png",
+        "src/images/imagen05.png",
+        "src/images/imagen06.png",
+        "src/images/imagen01.png",
+        "src/images/imagen02.png",
+        "src/images/imagen03.png",
+        "src/images/imagen04.png",
+        "src/images/imagen05.png",
+        "src/images/imagen06.png",
+
+      ];
+
+
+
+      // Algoritmo de Fisher-Yates para mezclar las imágenes
+      for (let i = images.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [images[i], images[j]] = [images[j], images[i]];
+      }
+
+      gridItems.forEach((item, index) => {
+        item.querySelector("img").src = images[index];
+      });
+    } 
+
+      // Inicializa el temporizador
+      updateTimer();
+      // Iniciar el cronómetro cuando se hace clic en la imagen
+
+
+      // Llama a initGame al cargar la página
+    // window.onload = initGame;
+    </script>
+  </body>
+</html>
